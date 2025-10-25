@@ -1,23 +1,53 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Play, Pause, RotateCcw, Volume2 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
+const TOTAL_TIME = 25 * 60; // 25 minutes in seconds
+
 const Focus = () => {
   const [taskIntent, setTaskIntent] = useState("");
   const [isRunning, setIsRunning] = useState(false);
-  const [timeRemaining, setTimeRemaining] = useState(25 * 60); // 25 minutes in seconds
-  const totalTime = 25 * 60;
+  const [timeRemaining, setTimeRemaining] = useState(TOTAL_TIME);
 
-  const formatTime = (seconds: number) => {
+  // Timer effect
+  useEffect(() => {
+    if (!isRunning || timeRemaining <= 0) return;
+
+    const interval = setInterval(() => {
+      setTimeRemaining((prev) => {
+        if (prev <= 1) {
+          setIsRunning(false);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [isRunning, timeRemaining]);
+
+  const formatTime = useCallback((seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
-  };
+  }, []);
 
-  const progress = ((totalTime - timeRemaining) / totalTime) * 100;
+  const progress = useMemo(
+    () => ((TOTAL_TIME - timeRemaining) / TOTAL_TIME) * 100,
+    [timeRemaining]
+  );
+
+  const handleReset = useCallback(() => {
+    setTimeRemaining(TOTAL_TIME);
+    setIsRunning(false);
+  }, []);
+
+  const toggleTimer = useCallback(() => {
+    setIsRunning((prev) => !prev);
+  }, []);
 
   return (
     <div className="min-h-screen pt-24 px-6 pb-12">
@@ -30,10 +60,10 @@ const Focus = () => {
 
         <div className="relative z-10 space-y-8">
           {/* Header */}
-          <div className="text-center space-y-2">
+          <header className="text-center space-y-2">
             <h1 className="text-4xl md:text-5xl font-bold">The Sanctuary</h1>
             <p className="text-muted-foreground text-lg">Enter your focus zone</p>
-          </div>
+          </header>
 
           {/* Main Focus Card */}
           <Card className="glass-card border-0 overflow-hidden">
@@ -41,10 +71,11 @@ const Focus = () => {
               {/* Task Intent Input */}
               {!isRunning && (
                 <div className="space-y-4 animate-fade-in">
-                  <label className="text-sm font-medium text-muted-foreground">
+                  <label htmlFor="task-input" className="text-sm font-medium text-muted-foreground">
                     What are you working on?
                   </label>
                   <Input
+                    id="task-input"
                     placeholder="e.g., Study for physics exam"
                     value={taskIntent}
                     onChange={(e) => setTaskIntent(e.target.value)}
@@ -59,9 +90,9 @@ const Focus = () => {
               {/* Timer Display */}
               <div className="text-center space-y-6">
                 <div className="relative inline-block">
-                  <div className="text-8xl md:text-9xl font-bold tabular-nums">
+                  <time className="text-8xl md:text-9xl font-bold tabular-nums">
                     {formatTime(timeRemaining)}
-                  </div>
+                  </time>
                   {isRunning && (
                     <div className="absolute -inset-8 bg-gradient-to-r from-primary/20 via-secondary/20 to-accent/20 rounded-full blur-3xl animate-pulse-glow" />
                   )}
@@ -80,9 +111,10 @@ const Focus = () => {
               <div className="flex items-center justify-center gap-4">
                 <Button
                   size="lg"
-                  onClick={() => setIsRunning(!isRunning)}
+                  onClick={toggleTimer}
                   className="rounded-full w-20 h-20 bg-primary hover:bg-primary/90 shadow-elevated"
                   disabled={!isRunning && !taskIntent}
+                  aria-label={isRunning ? "Pause timer" : "Start timer"}
                 >
                   {isRunning ? (
                     <Pause className="w-8 h-8" />
@@ -93,8 +125,9 @@ const Focus = () => {
                 <Button
                   size="lg"
                   variant="outline"
-                  onClick={() => setTimeRemaining(totalTime)}
+                  onClick={handleReset}
                   className="rounded-full w-16 h-16 glass-card border-primary/20"
+                  aria-label="Reset timer"
                 >
                   <RotateCcw className="w-6 h-6" />
                 </Button>
@@ -102,6 +135,7 @@ const Focus = () => {
                   size="lg"
                   variant="outline"
                   className="rounded-full w-16 h-16 glass-card border-primary/20"
+                  aria-label="Toggle sound"
                 >
                   <Volume2 className="w-6 h-6" />
                 </Button>
@@ -112,9 +146,9 @@ const Focus = () => {
                 <div className="text-center space-y-2 animate-fade-in">
                   <p className="text-sm text-muted-foreground">Current Task:</p>
                   <p className="text-xl font-semibold">{taskIntent}</p>
-                  <div className="inline-block px-4 py-1 rounded-full bg-primary/10 text-primary text-sm">
+                  <span className="inline-block px-4 py-1 rounded-full bg-primary/10 text-primary text-sm">
                     Analytical Work
-                  </div>
+                  </span>
                 </div>
               )}
             </CardContent>
@@ -125,13 +159,11 @@ const Focus = () => {
             <CardContent className="p-6">
               <div className="flex items-start gap-3">
                 <div className="w-2 h-2 rounded-full bg-primary mt-2 animate-pulse-glow" />
-                <div>
-                  <p className="text-sm text-muted-foreground">
-                    <span className="font-medium text-foreground">Focus Tip:</span> During your session, 
-                    Aura will gently remind you if you drift away to distracting sites. Your environment 
-                    adapts to your task type for optimal concentration.
-                  </p>
-                </div>
+                <p className="text-sm text-muted-foreground">
+                  <span className="font-medium text-foreground">Focus Tip:</span> During your session, 
+                  Aura will gently remind you if you drift away to distracting sites. Your environment 
+                  adapts to your task type for optimal concentration.
+                </p>
               </div>
             </CardContent>
           </Card>

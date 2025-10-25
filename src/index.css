@@ -1,0 +1,132 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* Aura Design System - Soft Pastels & Gradients */
+    --background: 210 100% 97%;
+    --foreground: 240 10% 25%;
+
+    --card: 0 0% 100% / 0.7;
+    --card-foreground: 240 10% 25%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 25%;
+
+    /* Primary - Soft Teal */
+    --primary: 170 45% 65%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 170 55% 75%;
+
+    /* Secondary - Lavender */
+    --secondary: 260 25% 70%;
+    --secondary-foreground: 0 0% 100%;
+
+    /* Accent - Soft Pink */
+    --accent: 340 45% 85%;
+    --accent-foreground: 240 10% 25%;
+
+    /* Muted tones */
+    --muted: 220 15% 92%;
+    --muted-foreground: 240 5% 50%;
+
+    --destructive: 0 70% 65%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 15% 88%;
+    --input: 220 15% 88%;
+    --ring: 170 45% 65%;
+
+    --radius: 1rem;
+
+    /* Aura-specific tokens */
+    --gradient-morning: linear-gradient(135deg, hsl(190, 60%, 80%), hsl(210, 55%, 85%));
+    --gradient-evening: linear-gradient(135deg, hsl(25, 70%, 80%), hsl(340, 50%, 85%));
+    --gradient-night: linear-gradient(135deg, hsl(260, 40%, 70%), hsl(280, 35%, 60%));
+    --gradient-calm: linear-gradient(135deg, hsl(170, 45%, 75%), hsl(260, 35%, 80%), hsl(340, 40%, 85%));
+    
+    --shadow-soft: 0 8px 32px -8px hsl(170 45% 65% / 0.2);
+    --shadow-elevated: 0 20px 60px -12px hsl(170 45% 65% / 0.3);
+    
+    --backdrop-blur: blur(24px);
+    --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .dark {
+    --background: 240 15% 12%;
+    --foreground: 210 40% 95%;
+
+    --card: 240 12% 18% / 0.7;
+    --card-foreground: 210 40% 95%;
+
+    --popover: 240 15% 15%;
+    --popover-foreground: 210 40% 95%;
+
+    --primary: 170 50% 55%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 170 60% 65%;
+
+    --secondary: 260 30% 60%;
+    --secondary-foreground: 0 0% 100%;
+
+    --accent: 340 50% 75%;
+    --accent-foreground: 240 15% 12%;
+
+    --muted: 240 10% 22%;
+    --muted-foreground: 220 10% 60%;
+
+    --destructive: 0 75% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 240 10% 25%;
+    --input: 240 10% 25%;
+    --ring: 170 50% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+    background: linear-gradient(135deg, hsl(190, 60%, 90%), hsl(210, 55%, 92%), hsl(260, 35%, 90%), hsl(340, 40%, 92%));
+    background-size: 400% 400%;
+    animation: gradient-shift 20s ease infinite;
+    min-height: 100vh;
+  }
+
+  @keyframes gradient-shift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.05); }
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+
+  .glass-card {
+    @apply backdrop-blur-2xl bg-card/70 border border-border/50 shadow-lg;
+  }
+
+  .hover-lift {
+    @apply transition-all duration-300 hover:scale-[1.02] hover:shadow-elevated;
+  }
+
+  .aura-glow {
+    animation: pulse-glow 3s ease-in-out infinite;
+  }
+}
